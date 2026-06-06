@@ -1,6 +1,10 @@
+import { AnimatePresence, motion } from "framer-motion";
+import { fadeUpVariants, springSoft } from "../motion";
+
 type PayloadPanelProps = {
   title: string;
   payload: unknown;
+  stepKey: number;
 };
 
 function highlightJson(value: unknown, indent = 0): string {
@@ -48,25 +52,42 @@ function highlightJson(value: unknown, indent = 0): string {
   return String(value);
 }
 
-export function PayloadPanel({ title, payload }: PayloadPanelProps) {
+export function PayloadPanel({ title, payload, stepKey }: PayloadPanelProps) {
   const isString = typeof payload === "string";
 
   return (
-    <div className="panel-card payload-panel">
+    <motion.div
+      className="panel-card payload-panel"
+      layout
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ ...springSoft, delay: 0.05 }}
+    >
       <div className="panel-card-header">{title}</div>
-      <div className="panel-card-body">
-        {isString ? (
-          <pre>
-            <span className="payload-string">"{payload}"</span>
-          </pre>
-        ) : (
-          <pre
-            dangerouslySetInnerHTML={{
-              __html: highlightJson(payload),
-            }}
-          />
-        )}
+      <div className="panel-card-body payload-body">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={stepKey}
+            variants={fadeUpVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            className="payload-content"
+          >
+            {isString ? (
+              <pre>
+                <span className="payload-string">"{payload}"</span>
+              </pre>
+            ) : (
+              <pre
+                dangerouslySetInnerHTML={{
+                  __html: highlightJson(payload),
+                }}
+              />
+            )}
+          </motion.div>
+        </AnimatePresence>
       </div>
-    </div>
+    </motion.div>
   );
 }
