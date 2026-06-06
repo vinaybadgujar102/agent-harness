@@ -1,5 +1,11 @@
 import { GoogleGenAI } from "@google/genai/node";
 import type { ToolCall } from "./types";
+import {
+  firePostHooks,
+  firePreHooks,
+  type HookContext,
+  type Hooks,
+} from "./lifeCycleHooks";
 
 export type Part = Record<string, unknown>[];
 
@@ -41,7 +47,7 @@ export async function runLoopStep(
   ai: GoogleGenAI, // pass the ai provider we using, currently only supporting gemini, many can be added later
   history: Message[], // the collection of messages doing back and forth with llm
   systemInstruction = BASE_SYSTEM_INSTRUCTION,
-  hooks?: Hook,
+  hooks?: Hooks,
 ) {
   const response = await ai.models.generateContent({
     model: MODEL,
@@ -78,7 +84,7 @@ export async function runLoopStep(
   // llm may have responed with multiple tools to call so we have to call
   // each one and store its response
   for (const call of calls) {
-    // understand this hook calling later
+    // context we give to the hooks to let them know which tool and its result
     const context: HookContext = { tool: call };
     const decision = await firePreHooks(hooks, context);
     if (decision === "deny") {
