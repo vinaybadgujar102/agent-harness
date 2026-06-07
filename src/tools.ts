@@ -1,4 +1,4 @@
-import type { ToolCall } from "./tpes";
+import type { ToolCall } from "./types.ts";
 import { GoogleGenAI, Type } from "@google/genai";
 import { BASE_SYSTEM_INSTRUCTION } from "./whileLoop";
 export const MODEL = "gemini-2.5-flash";
